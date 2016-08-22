@@ -18,11 +18,8 @@ $usepreferredLenders = 'true';
 $preferredLenders = array(
 //example: "0" => 'ABC'
 "0" => '',
-//AMBS
 "1" => '',
-//Grace
 "2" => '',
-//Trine
 "3" => ''
 );
 
