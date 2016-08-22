@@ -1,0 +1,29 @@
+<?php
+$key = '';
+$secret = '';
+$principleId = '';
+$principleIdNs = '';
+#institutionId is the numeric code for your library;
+$institutionId = '';
+#institutionURL is the library portion of your WorldCat discoveryURL (e.g., if your URL is foo.on.worldcat.org; put 'foo' below;
+$institutionURL = '';
+#institutionCode is your OCLC symbol
+$institutionCode = '';
+#do you allow onshelf holds?  if not, put false
+$onshelfHold = 'true';
+#put the base URL of your ILL form
+$illForm = 'http://forms.palni.org/ancilla-ill-form';
+#do you want requests to only go to lenders geographically near you?  if so put 'true'
+$usepreferredLenders = 'true';
+$preferredLenders = array(
+//example: "0" => 'ABC'
+"0" => '',
+//AMBS
+"1" => '',
+//Grace
+"2" => '',
+//Trine
+"3" => ''
+);
+
+?>
