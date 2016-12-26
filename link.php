@@ -74,8 +74,6 @@
 		          $barcode = $circulation->itemId;    
 			      } 	          
         }
-      
-				 
 		          $availarray = array();
 		          $callavail = array();
 		          $shelfarray = array();

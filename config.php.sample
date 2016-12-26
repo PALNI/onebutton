@@ -7,11 +7,11 @@ $principleIdNs = '';
 $institutionId = '';
 #institutionURL is the library portion of your WorldCat discoveryURL (e.g., if your URL is foo.on.worldcat.org; put 'foo' below;
 $institutionURL = '';
-#institutionCode is your OCLC symbol
+#institutionCode is your OCLC symbol.  Used to check holdings.
 $institutionCode = '';
 #do you allow onshelf holds?  if not, put false
 $onshelfHold = 'true';
-#put the base URL of your ILL form
+#put the base URL of your ILL form.  Do not include training slash (/)
 $illForm = '';
 #do you want requests to only go to lenders geographically near you?  if so put 'true'
 $usepreferredLenders = 'false';
