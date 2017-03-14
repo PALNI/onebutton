@@ -30,7 +30,11 @@
     }
     $today = date("m-d-Y");
     $logfile = "logs/". $today ."-log.txt";
+    if ($oclcILL = 'true') {
+    $openILL = $illForm . $oclcNum;
+    } else {
     $openILL = $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate;
+    }
    require_once('../vendor/autoload.php');
    require('config.php');
    use OCLC\Auth\WSKey;
@@ -74,6 +78,8 @@
 		          $barcode = $circulation->itemId;    
 			      } 	          
         }
+      
+				 
 		          $availarray = array();
 		          $callavail = array();
 		          $shelfarray = array();
@@ -92,7 +98,7 @@
           if ($institutionHolding[0] > 0) {
 		        $holdurl = 'https://' . $institutionURL .'.on.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=&queryString=' . $oclcNum . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $oclcNum . '/circ/hold/PLACE_HOLD';
 		        //Write to log file
-		        $current = "Place Hold: \t" . $holdurl ."\n";
+		        $current = "Place Hold: " . $holdurl ."\n";
           		$current .= file_get_contents($logfile);
           		file_put_contents($logfile, $current);
 		        echo '<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Get It!</title><link rel="stylesheet" href="../bootstrap/css/sticky-footer-navbar.css"><link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css"><script>
@@ -123,13 +129,13 @@
 		    		if (in_array_any($preferredLenders, $institutions)) {
 		    			//Write to log file
 		    				$prefholdurl = 'https://' . $institutionURL .'.on.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=&queryString=' . $oclcNum . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $oclcNum . '/circ/hold/PLACE_HOLD';
-		        			$current = "Preferred Lender Hold: \t" . $prefholdurl ."\n";
+		        			$current = "Preferred Lender Hold: " . $prefholdurl ."\n";
           					$current .= file_get_contents($logfile);
           					file_put_contents($logfile, $current);
 		         		Header( 'Location: https://' . $institutionURL .'.on.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=&queryString=' . $oclcNum . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $oclcNum . '/circ/hold/PLACE_HOLD' );
 		         	} else {
 		         		//Write to log file
-		        			$current = "No Preferred Lender ILL Form: \t" . $openILL ."\n";
+		        			$current = "No Preferred Lender ILL Form: " . $openILL ."\n";
           					$current .= file_get_contents($logfile);
           					file_put_contents($logfile, $current);
     		        	Header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
@@ -138,13 +144,13 @@
 		          	if (!empty($institutions)) {
 		          		//Write to log file
 		    				$palshareurl = 'https://' . $institutionURL .'.on.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=&queryString=' . $oclcNum . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $oclcNum . '/circ/hold/PLACE_HOLD';
-		        			$current = "PALShare Hold: \t" . $palshareurl ."\n";
+		        			$current = "PALShare Hold: " . $palshareurl ."\n";
           					$current .= file_get_contents($logfile);
           					file_put_contents($logfile, $current);
 		              	Header( 'Location: https://' . $institutionURL .'.on.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=&queryString=' . $oclcNum . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $oclcNum . '/circ/hold/PLACE_HOLD' );
 		             } else {
 		             	//Write to log file
-		        			$current = "No PALShare ILL: \t" . $openILL ."\n";
+		        			$current = "No PALShare ILL: " . $openILL ."\n";
           					$current .= file_get_contents($logfile);
           					file_put_contents($logfile, $current);
     		        	Header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
@@ -154,7 +160,7 @@
         
   		} else {
   			//Write to log file
-		        $current = "Fallback ILL: \t" . $openILL ."\n";
+		        $current = "Fallback ILL: " . $openILL ."\n";
           		$current .= file_get_contents($logfile);
           		file_put_contents($logfile, $current);
     		header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
@@ -163,7 +169,7 @@
     //catch errors (e.g., API is down) and forward request to ILL form
     catch (\Exception $e) {
     //Write to log file
-		        $current = "API Failure ILL: \t" . $openILL ."\n";
+		        $current = "API Failure ILL: " . $openILL ."\n";
           		$current .= file_get_contents($logfile);
           		file_put_contents($logfile, $current);
 	header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
