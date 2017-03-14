@@ -30,13 +30,13 @@
     }
     $today = date("m-d-Y");
     $logfile = "logs/". $today ."-log.txt";
-    if ($oclcILL = 'true') {
+   require_once('../vendor/autoload.php');
+   require('config.php');
+   if ($oclcILL = 'true') {
     $openILL = $illForm . $oclcNum;
     } else {
     $openILL = $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate;
     }
-   require_once('../vendor/autoload.php');
-   require('config.php');
    use OCLC\Auth\WSKey;
    use OCLC\User;
    use Guzzle\Http\Client;
@@ -138,7 +138,8 @@
 		        			$current = "No Preferred Lender ILL Form: " . $openILL ."\n";
           					$current .= file_get_contents($logfile);
           					file_put_contents($logfile, $current);
-    		        	Header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
+    		        	//Header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
+    		        	Header( 'Location: '. $openILL  ) ;
     		        }
 		    }  elseif ($usepreferredLenders == 'false') {
 		          	if (!empty($institutions)) {
@@ -153,7 +154,8 @@
 		        			$current = "No PALShare ILL: " . $openILL ."\n";
           					$current .= file_get_contents($logfile);
           					file_put_contents($logfile, $current);
-    		        	Header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
+    		        	//Header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
+    		        	Header( 'Location: '. $openILL  ) ;
     		        }
     			}
         
@@ -163,7 +165,8 @@
 		        $current = "Fallback ILL: " . $openILL ."\n";
           		$current .= file_get_contents($logfile);
           		file_put_contents($logfile, $current);
-    		header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
+    		//header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
+    		Header( 'Location: '. $openILL  ) ;
     }
     }  
     //catch errors (e.g., API is down) and forward request to ILL form
@@ -172,10 +175,12 @@
 		        $current = "API Failure ILL: " . $openILL ."\n";
           		$current .= file_get_contents($logfile);
           		file_put_contents($logfile, $current);
-	header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
+	//header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
+	Header( 'Location: '. $openILL  ) ;
     }
     //Handle Warnings
         function warning_handler($errno, $errstr) { 
-	    header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
+	    //header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
+	    Header( 'Location: '. $openILL  ) ;
     }
 ?>
