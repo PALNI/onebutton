@@ -11,10 +11,8 @@ $institutionURL = '';
 $institutionCode = '';
 #do you allow onshelf holds?  if not, put false
 $onshelfHold = 'true';
-#do you use the OCLC ILL form? if not put false, and fill out the illForm base URL parameter
+#do you use the OCLC ILL form? If yes, true; If not and you use a custom form or an ILLiad form put false
 $oclcILL = 'true';
-#BaseURL of OCLC ILL form, e.g. : https://foo.on.worldcat.org/ILL/oclc/
-$oclcILLurl = 'https://foo.on.worldcat.org/ILL/oclc/';
 #put the base URL of your ILL form.  Do not include training slash (/)
 $illForm = '';
 #do you want requests to only go to lenders geographically near you?  if so put 'true'
