@@ -120,7 +120,7 @@
 		        $current = "Place Hold: " . $holdurl ."\n";
           		$current .= file_get_contents($logfile);
           		file_put_contents($logfile, $current);
-          		if ($onshelfHold = 'true') {
+          		if ($onshelfHold == 'true') {
           		Header( 'Location: '. $holdurl  ) ;
           		}
           		else {
