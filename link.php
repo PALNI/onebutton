@@ -30,6 +30,11 @@
       $pubDate = urlencode($_GET['rft_date']);
     }
     $today = date("m-d-Y");
+    //pull all openURL parameters
+    $page = $_SERVER['REQUEST_URI'];
+    $query = parse_url($page, PHP_URL_QUERY);
+    parse_str($query);
+    parse_str($query, $arr);
     
     //if doesn't exist, create logs directory, set permissions
      if (!file_exists('logs')) {
@@ -46,7 +51,9 @@
    if ($oclcILL == 'true') {
     $openILL = $illForm . $oclcNum;
     } else {
-    $openILL = $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate;
+    //$openILL = $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate;
+    $openILL = $illForm . $query;
+
     }
     
     //Request data from Availability API
