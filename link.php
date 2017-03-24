@@ -51,7 +51,6 @@
    if ($oclcILL == 'true') {
     $openILL = $illForm . $oclcNum;
     } else {
-    //$openILL = $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate;
     $openILL = $illForm . $query;
 
     }
@@ -179,7 +178,6 @@
 		        			$current = "No PALShare ILL: " . $openILL ."\n";
           					$current .= file_get_contents($logfile);
           					file_put_contents($logfile, $current);
-    		        	//Header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
     		        	Header( 'Location: '. $openILL  ) ;
     		        }
     			}
@@ -190,7 +188,6 @@
 		        $current = "Fallback ILL: " . $openILL ."\n";
           		$current .= file_get_contents($logfile);
           		file_put_contents($logfile, $current);
-    		//header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
     		Header( 'Location: '. $openILL  ) ;
     }
     }  
@@ -200,12 +197,10 @@
 		        $current = "API Failure ILL: " . $openILL ."\n";
           		$current .= file_get_contents($logfile);
           		file_put_contents($logfile, $current);
-	//header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
 	Header( 'Location: '. $openILL  ) ;
     }
     //Handle Warnings
         function warning_handler($errno, $errstr) { 
-	    //header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
 	    Header( 'Location: '. $openILL  ) ;
     }
 ?>
