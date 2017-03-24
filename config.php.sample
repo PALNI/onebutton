@@ -13,7 +13,7 @@ $institutionCode = '';
 $onshelfHold = 'true';
 #do you use the OCLC ILL form? If yes, true; If not and you use a custom form or an ILLiad form put false
 $oclcILL = 'true';
-#put the base URL of your ILL form.  Do not include training slash (/)
+#put the base URL of your ILL form.  Include trailing slash and/or ? if applicable
 $illForm = '';
 #do you want requests to only go to lenders geographically near you?  if so put 'true'
 $usepreferredLenders = 'false';
