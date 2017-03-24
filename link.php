@@ -7,6 +7,7 @@
     $isbn = "";
     $pubDate = "";
     
+    //define openURL parameters from generic URL from WorldCat Local / Discovery
     if (isset($_GET['rfe_dat'])) {
        $oclcNum = $_GET['rfe_dat'];
     }
@@ -29,14 +30,26 @@
       $pubDate = urlencode($_GET['rft_date']);
     }
     $today = date("m-d-Y");
-    $logfile = "logs/". $today ."-log.txt";
+    
+    //if doesn't exist, create logs directory, set permissions
+     if (!file_exists('logs')) {
+    mkdir('logs', 0755, true);
+	}
+    //create log file 
+    $logfile = "logs/". $today ."-log.txt";  
+    
+   //Require dependencies for using OCLC APIs
    require_once('../vendor/autoload.php');
    require('config.php');
-   if ($oclcILL = 'true') {
+   
+   //if using OCLC ILL
+   if ($oclcILL == 'true') {
     $openILL = $illForm . $oclcNum;
     } else {
     $openILL = $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate;
     }
+    
+    //Request data from Availability API
    use OCLC\Auth\WSKey;
    use OCLC\User;
    use Guzzle\Http\Client;
@@ -101,6 +114,10 @@
 		        $current = "Place Hold: " . $holdurl ."\n";
           		$current .= file_get_contents($logfile);
           		file_put_contents($logfile, $current);
+          		if ($onshelfHold = 'true') {
+          		Header( 'Location: '. $holdurl  ) ;
+          		}
+          		else {
 		        echo '<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Get It!</title><link rel="stylesheet" href="../bootstrap/css/sticky-footer-navbar.css"><link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css"><script>
 					function getReferrer() {
     				var x = document.referrer;
@@ -125,6 +142,7 @@
     				<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     				<!-- Include all compiled plugins (below), or include individual files as needed -->
     				<script src="../bootstrap/js/bootstrap.min.js"></script></body></html>';
+    				}
 		    }  elseif ($usepreferredLenders == 'true') {
 		    		if (in_array_any($preferredLenders, $institutions)) {
 		    			//Write to log file
