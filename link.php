@@ -1,7 +1,32 @@
 <?php
-    set_error_handler("warning_handler", E_WARNING);
+//set_error_handler("warning_handler", E_WARNING);
+//Request data from Availability API
+   use OCLC\Auth\WSKey;
+   use OCLC\User;
+   use Guzzle\Http\Client;
+   
+$config = include('config.php');
+
+/*Create log directory and file*/
+function createLogs() {
+//if doesn't exist, create logs directory, set permissions
+    if (!file_exists('logs')) {
+    mkdir('logs', 0755, true);
+	}
+    //create log file 
+    $today = date("m-d-Y");
+    $logfile = "logs/". $today ."-log.txt";
+    touch($logfile);
+    return $logfile;
+}
+
+
+/*lookUp function queries WorldCat Availability API for holdings and availability   
+and returns institutional holdings as well as holdings available across PALShare*/
+function lookUp() {
+    $config = include('config.php');
     $oclcNum = "";
-    $bookTitle = "";
+    $bookTitle = "null";
     $authorLast = "";
     $authorFirst = "";
     $isbn = "";
@@ -36,32 +61,18 @@
     parse_str($query);
     parse_str($query, $arr);
     
-    //if doesn't exist, create logs directory, set permissions
-     if (!file_exists('logs')) {
-    mkdir('logs', 0755, true);
-	}
-    //create log file 
-    $logfile = "logs/". $today ."-log.txt";  
     
    //Require dependencies for using OCLC APIs
    require_once('../vendor/autoload.php');
+   //configuration file, API keys, etc.
    require('config.php');
+   //include file of locations that don't lend for PALShare
+   require('nonlending.php');
    
-   //if using OCLC ILL
-   if ($oclcILL == 'true') {
-    $openILL = $illForm . $oclcNum;
-    } else {
-    $openILL = $illForm . $query;
-
-    }
-    
-    //Request data from Availability API
-   use OCLC\Auth\WSKey;
-   use OCLC\User;
-   use Guzzle\Http\Client;
-   $wskey = new WSKey($key, $secret);
-   $url = 'https://worldcat.org/circ/availability/sru/service?x-registryId=' . $institutionId . '&x-return-group-availability=true' . '&query=no:ocm' . $oclcNum;
-   $user = new User($institutionId, $principleId, $principleIdNs);
+   //build Availability API request authorization
+   $wskey = new WSKey($config['key'], $config['secret']);
+   $url = 'https://worldcat.org/circ/availability/sru/service?x-registryId=' . $config['institutionId'] . '&x-return-group-availability=true' . '&query=no:ocm' . $oclcNum;
+   $user = new User($config['institutionId'], $config['principleId'], $config['principleIdNs']);
    $options = array('user'=> $user);
 
    $authorizationHeader = $wskey->getHMACSignature('GET', $url, $options);
@@ -71,60 +82,123 @@
    $headers = array();
    $headers['Authorization'] = $authorizationHeader;
    $request = $client->createRequest('GET', $url, $headers);
-   
-   //use try in case no response / Exception from API
+
+   //send request, get back XML
    try {
    		$response = $request->send();
         $xml = $response->getBody(TRUE);
         $xmlObj = simplexml_load_string($xml);
+        //Get the title of the book for use on results display screen
+        	$titlea = "";
+        	$titleb = "";
+        	$titlec = "";
+        	$bookTitle = "";
+        	$titlea = $xmlObj->xpath('//datafield[@tag="245"]/subfield[@code="a"]');
+        	$titleb = $xmlObj->xpath('//datafield[@tag="245"]/subfield[@code="b"]');
+        	$titlec = $xmlObj->xpath('//datafield[@tag="245"]/subfield[@code="c"]');
+        		if (!empty($titlea)) {
+          			$bookTitle = $titlea[0];
+        		}
+        		if (!empty($titleb)) {
+          			$bookTitle = $bookTitle . $titleb[0];
+        		}
+        		if (!empty($titlec)) {
+          			$bookTitle = $bookTitle . $titlec[0];
+        		}
+        	$title = $bookTitle;
+        
+        //Get holdings and write to line array
 		if(isset($xmlObj->records->record->recordData->opacRecord->holdings->holding))  {
 		    $institutions = array();
+		    $localloc = array();
 		    $availability = array();
 		    $callnums = array();
 		    $shelfs = array();
+		    $line = array();
 		    foreach ($xmlObj->records->record->recordData->opacRecord->holdings->holding as $holding) {
 		      $institution = (string) $holding->nucCode;
+		      $localloc = $holding->localLocation;
 		      $shelf = (string) $holding->shelvingLocation;
 		      $callnum = (string) $holding->callNumber;
 		      $instavailcount = array();
 		      $datapoints = array();
 		      foreach ($holding->circulations->circulation as $circulation) {
 		          $institutions[] = $institution;
+		          $localloc[] = $localloc;
 		          $shelfs[] = $shelf;
 		          $callnums[] = $callnum;
 		      	  $avail = (string) $circulation->availableNow->attributes();
 			      $availability[] = $avail;
-		          $barcode = $circulation->itemId;    
-			      } 	          
+		          $barcode = $circulation->itemId;
+		          $line[] = array("inst"=>$institution,"loc"=>$shelf,"callnum"=>$callnum, "avail"=>$avail, "barcode"=>$barcode, "localloc"=>$localloc);
+			      }       
+            }
+        
+        //if holdings are found, check each holding line array for availability
+        if (is_array($line)) {
+          $innerLine = array();
+          foreach ($line as $innerLine) {
+    		//  Check type
+    		if (is_array($innerLine)){
+       		 	//  Scan through inner loop
+        		foreach ($innerLine as $value) {
+        		  $instLine = $innerLine["inst"];
+        		  $locLine = $innerLine["loc"];
+        		  $callLine = $innerLine["callnum"];
+        		  $availLine = $innerLine["avail"];
+        		  $locallocLine = $innerLine["localloc"];
+        		  //Use MD5 hash because some branch codes have special characters, see nonlending.php
+        		  $locallocLine = md5($locallocLine);
+        		}
+        			//check the branch code (locallocLine) and loc (locLine) against the nonlending locs in nonlending.php
+        			$found=false;
+        		
+        			foreach ($palninonlending as $ke=>$va) {
+        		  		if($ke == $locallocLine) {
+        		    		foreach($va as $k=>$v) {
+        		      				if($v == $locLine) {
+        		        				$found=true;
+        		      				}
+        		      		}		
+        		        }
+        		     }
+        		//if the branch code/loc match values in nonlending.php, skip; otherwise, check availability
+        		if ($found == true) {
+        		  continue;
+        		} else {
+        		  //if there are items available, check to make sure items are actually available; if so, create array of available items
+        		  	if (($instLine == $config['institutionCode']) && ($availLine !== '0')) { 
+        		      		$instItems[] = "<p><strong>Call Number:</strong>  " . $callLine . "  <br /><strong>Shelving Location:</strong>  " . $locLine . '</p>';
+        		    	}  elseif (($instLine !== $config['institutionCode']) && ($availLine !== '0')) {
+        		        //create nested array with shelvingLocation and availability of Resource-Sharing held items to be passed to resShare function
+        		         	$resItems[] = array('callnumber'=>$callLine, 'shelvinglocation'=>$locLine, 'availability'=>$availLine, 'instl'=>$instLine);
+        		         } 
+          		} 	   
+           }
+         }
         }
-      
-				 
-		          $availarray = array();
-		          $callavail = array();
-		          $shelfarray = array();
-		          $availarray = array_combine($institutions,$availability);
-		          $callavail = array_combine($institutions, $callnums);
-		          $shelfarray = array_combine($institutions, $shelfs);
-		          $availmerged = array_merge_recursive($availarray, $callavail, $shelfarray);
-		          $institutionHolding = (isset($availmerged[$institutionCode]))?$availmerged[$institutionCode]:'There is no '.$institutionCode.' holding';
-		          $holdCount = $institutionHolding[0];
-		          $institutionCall = $institutionHolding[1];
-		          $institutionShelf = $institutionHolding[2];
-		          
-		          function in_array_any($n, $h) {
-   					return !!array_intersect($n, $h);
-				  }
-          if ($institutionHolding[0] > 0) {
-		        $holdurl = 'https://' . $institutionURL .'.on.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=&queryString=' . $oclcNum . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $oclcNum . '/circ/hold/PLACE_HOLD';
-		        //Write to log file
-		        $current = "Place Hold: " . $holdurl ."\n";
+     }
+    //end try
+    }
+    //catch errors (e.g., API is down) and forward request to ILL form
+    catch (\Exception $e) {
+      //Write to log file
+		        $current = "API Failure ILL: " . $openILL ."\n";
           		$current .= file_get_contents($logfile);
           		file_put_contents($logfile, $current);
-          		if ($onshelfHold == 'true') {
-          		Header( 'Location: '. $holdurl  ) ;
-          		}
-          		else {
-		        echo '<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Get It!</title><link rel="stylesheet" href="../bootstrap/css/sticky-footer-navbar.css"><link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css"><script>
+	  Header( 'Location: '. $openILL  ) ;
+    }
+return array('instItems' => $instItems, 'institutions' => $resItems, 'oclcNum' => $oclcNum, 'query' => $query, 'bookTitle' => $bookTitle);
+}
+
+
+/*showPage function displays institutional holdings and/or stackMap, if stackMap is available*/
+#function showPage($lookUpResult) {
+function showPage($instItems,$bookTitle,$instoclc) {
+                    $config = include('config.php');
+                    //TODO - fix the resshareURL; the $lookUpResult parameter is not just the OCLC number
+                    $resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' . $bookTitle . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $instoclc . '/circ/hold/PLACE_HOLD';
+                    echo '<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Get It!</title><link rel="stylesheet" href="../bootstrap/css/sticky-footer-navbar.css"><link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css"><script>
 					function getReferrer() {
     				var x = document.referrer;
     				document.getElementById("refer").setAttribute("href",x);
@@ -144,63 +218,113 @@
       					</div>
     				</nav>
     				<div class="container">
-    				<p class="lead">This item is available in your library! <a href="'. $holdurl . '">Place a hold</a> or find it on the shelf:  <br /><strong>Call Number:</strong>  ' . $institutionCall . '  <br /><strong>Shelving Location:</strong>  ' . $institutionShelf . '</div><!-- jQuery (necessary for Bootstrap\'s JavaScript plugins) -->
+    				<p class="lead">This item is available in your library!</p>';
+                                if ($config[onshelfHold] == 'true') {
+                                  echo '<p class="lead"><a href="'. $resshareurl . '">Place a hold</a> and pickup the item at the circulation desk OR</p>';
+                                }
+                                echo '<p class="lead">Find it on the shelf at the call number and shelving location shown below:</p>';
+                                echo '<p><strong>Title:</strong>  ' . $bookTitle . '</p>';
+    				foreach ($instItems as $displayItem) {
+    				  echo $displayItem;
+    				}
+
+    				echo '<!-- jQuery (necessary for Bootstrap\'s JavaScript plugins) -->
     				<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     				<!-- Include all compiled plugins (below), or include individual files as needed -->
     				<script src="../bootstrap/js/bootstrap.min.js"></script></body></html>';
-    				}
-		    }  elseif ($usepreferredLenders == 'true') {
-		    		if (in_array_any($preferredLenders, $institutions)) {
-		    			//Write to log file
-		    				$prefholdurl = 'https://' . $institutionURL .'.on.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=&queryString=' . $oclcNum . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $oclcNum . '/circ/hold/PLACE_HOLD';
-		        			$current = "Preferred Lender Hold: " . $prefholdurl ."\n";
-          					$current .= file_get_contents($logfile);
-          					file_put_contents($logfile, $current);
-		         		Header( 'Location: https://' . $institutionURL .'.on.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=&queryString=' . $oclcNum . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $oclcNum . '/circ/hold/PLACE_HOLD' );
-		         	} else {
-		         		//Write to log file
-		        			$current = "No Preferred Lender ILL Form: " . $openILL ."\n";
-          					$current .= file_get_contents($logfile);
-          					file_put_contents($logfile, $current);
-    		        	//Header( 'Location: '. $illForm . '?rfe_dat=' . $oclcNum . '&rft.btitle=' . $bookTitle . '&rft_aulast=' . $authorLast . '&rft_aufirst=' . $authorFirst . '&rft_isbn=' . $isbn . '&rft_date=' . $pubDate  ) ;
-    		        	Header( 'Location: '. $openILL  ) ;
-    		        }
-		    }  elseif ($usepreferredLenders == 'false') {
-		          	if (!empty($institutions)) {
-		          		//Write to log file
-		    				$palshareurl = 'https://' . $institutionURL .'.on.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=&queryString=' . $oclcNum . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $oclcNum . '/circ/hold/PLACE_HOLD';
-		        			$current = "PALShare Hold: " . $palshareurl ."\n";
-          					$current .= file_get_contents($logfile);
-          					file_put_contents($logfile, $current);
-		              	Header( 'Location: https://' . $institutionURL .'.on.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=&queryString=' . $oclcNum . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $oclcNum . '/circ/hold/PLACE_HOLD' );
-		             } else {
-		             	//Write to log file
-		        			$current = "No PALShare ILL: " . $openILL ."\n";
-          					$current .= file_get_contents($logfile);
-          					file_put_contents($logfile, $current);
-    		        	Header( 'Location: '. $openILL  ) ;
-    		        }
-    			}
-        
-        
-  		} else {
-  			//Write to log file
-		        $current = "Fallback ILL: " . $openILL ."\n";
-          		$current .= file_get_contents($logfile);
-          		file_put_contents($logfile, $current);
-    		Header( 'Location: '. $openILL  ) ;
+}
+
+
+
+
+/*function create resource sharing place hold URL*/
+function resShare($ressearch,$resoclc) {
+      
+      //include config and nonlending settings
+      	$config = include('config.php');
+      	require('nonlending.php');
+	  	$resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' . $ressearch . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $resoclc. '/circ/hold/PLACE_HOLD';
+	  
+	  //Write to log file
+	  	$createLogsResult = createLogs();
+	  	
+	  	$current = file_get_contents($createLogsResult);
+	  	$current .= "PALShare Hold: " . $resshareurl ."\n";
+	  	file_put_contents($createLogsResult,$current);
+	  
+	  
+	  //Direct to Resource Sharing URL
+	  	Header( 'Location: https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' .$ressearch. '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $resoclc . '/circ/hold/PLACE_HOLD' );
+}
+
+
+
+
+
+/*function directs request to ILL Form
+Pass OCLC Number or query from original request*/
+function requestILL($illquery,$illoclc) {
+	//include config file
+		$config = include('config.php');
+        //if using OCLC ILL, only need oclcNumber
+   		if ($config['oclcILL'] == 'true') {
+      		$openILL = $config['illForm'] . $illoclc;
+      		
+      		//Write to log file
+	  			$createLogsResult = createLogs();
+	  	
+	  			$current = file_get_contents($createLogsResult);
+	  			$current .= "ILLRequest " . $openILL ."\n";
+	  			file_put_contents($createLogsResult,$current);
+      		
+      		
+      		Header( 'Location: '. $openILL  ) ;
+      	//if using generic OpenURL illForm, need full openURL query
+    	} else {
+      		$openILL = $config['illForm'] . $illquery;
+      		Header( 'Location: '. $openILL  ) ;
     }
-    }  
-    //catch errors (e.g., API is down) and forward request to ILL form
-    catch (\Exception $e) {
-    //Write to log file
-		        $current = "API Failure ILL: " . $openILL ."\n";
-          		$current .= file_get_contents($logfile);
-          		file_put_contents($logfile, $current);
-	Header( 'Location: '. $openILL  ) ;
-    }
+}
+
+
+/*Process Request and Call Functions*/
+
+//Call OCLC API lookup function to get associative array results
+$lookUpResult = lookUp();
+
+//if held and available in instition, show availability and stack map
+//ToDo - add logging here, so we can assess how many times, if any, this screen shows
+if (is_array($lookUpResult['instItems'])) {
+  $instItems = $lookUpResult['instItems'];
+  $bookTitle = $lookUpResult['bookTitle'];
+  $instoclc = $lookUpResult['oclcNum'];
+  showPage($instItems,$bookTitle,$instoclc);
+  
+  
+//if PALShare holdings, direct to PALShare hold
+//institutions is resItems of lookUpResult function (available resource sharing items)
+} elseif (is_array($lookUpResult['institutions'])) {
+  $ressearch = $lookUpResult['bookTitle'];
+  $resoclc = $lookUpResult['oclcNum'];
+  //comment out for debugging to only show resource sharing array output
+  resShare($ressearch,$resoclc);
+  //Uncomment for debugging
+  //print_r($lookUpResult['institutions']);
+  //print_r($lookUpResult['bookTitle']);
+  
+//No institution or PALShare holdings, send user to ILL request
+} else {
+  $illquery = $lookUpResult['query'];
+  $illoclc = $lookUpResult['oclcNum'];
+  //comment out for debugging
+  requestILL($illquery,$illoclc);
+  //Uncomment for debugging
+  //print_r($lookUpResult);
+}
+    
     //Handle Warnings
         function warning_handler($errno, $errstr) { 
-	    Header( 'Location: '. $openILL  ) ;
+	    //Header( 'Location: '. $openILL  ) ;
     }
+   
 ?>
