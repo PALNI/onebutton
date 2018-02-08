@@ -1,0 +1,12 @@
+?php
+//Define all holding location codes and shelving locations that do NOT supply/lend for Resource Sharing
+//use md5 hash because some lending locations have special characters that can't be used as array keys
+$palninonlending = array(
+//Some Institution
+md5("ABCB") => array("Special Collections, Reserves"),
+//Some Other Institution/Holding Location
+md5("ABCB") => array("General Stacks"),
+
+);
+
+?>

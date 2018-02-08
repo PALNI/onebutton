@@ -1,28 +1,29 @@
 <?php
-$key = '';
-$secret = '';
-$principleId = '';
-$principleIdNs = '';
+return [
+'key' => '',
+'secret' => '',
+'principleId' => '',
+'principleIdNs' => '',
 #institutionId is the numeric code for your library;
-$institutionId = '';
-#institutionURL is the library portion of your WorldCat discoveryURL (e.g., if your URL is foo.on.worldcat.org; put 'foo' below;
-$institutionURL = '';
-#institutionCode is your OCLC symbol.  Used to check holdings.
-$institutionCode = '';
+'institutionId' => '',
+#institutionURL is the library portion of your WorldCat Local/Discovery URL (e.g., if your URL is foo.on.worldcat.org; put 'foo.on' below;
+'institutionURL' => '',
+#institutionCode is your OCLC symbol.  This symbol is used to find holdings.
+'institutionCode' => '',
 #do you allow onshelf holds?  if not, put false
-$onshelfHold = 'true';
-#do you use the OCLC ILL form? If yes, true; If not and you use a custom form or an ILLiad form put false
-$oclcILL = 'true';
-#put the base URL of your ILL form.  Include trailing slash and/or ? if applicable
-$illForm = '';
+'onshelfHold' => 'true',
+#do you use the OCLC ILL form? if not put false, and fill out the illForm base URL parameter
+'oclcILL' => 'true',
+#put the base URL of your ILL form (ILLiad, WorldShare ILL, etc.)
+'illForm' => '',
 #do you want requests to only go to lenders geographically near you?  if so put 'true'
-$usepreferredLenders = 'false';
-$preferredLenders = array(
+'usepreferredLenders' => 'false',
+'preferredLenders' => [
 //example: "0" => 'ABC'
-"0" => '',
-"1" => '',
-"2" => '',
-"3" => ''
-);
-
+        "0" => '',
+        "1" => '',
+        "2" => '',
+        "3" => ''
+                      ]
+]
 ?>
