@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><searchRetrieveResponse xmlns="http://www.loc.gov/zing/srw/" xmlns:ns2="http://www.loc.gov/zing/cql/xcql/" xmlns:ns4="http://www.loc.gov/zing/srw/update/" xmlns:ns3="http://www.loc.gov/zing/srw/diagnostic/">
+  <numberOfRecords>1</numberOfRecords>
+  <resultSetId>default</resultSetId>
+  <records>
+    <record>
+      <recordSchema>OPACXML</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <opacRecord xmlns="" xmlns:ns5="http://www.loc.gov/zing/srw/">
+          <bibliographicRecord>
+            <record type="Bibliographic">
+              <leader>cam  I  </leader>
+              <controlfield tag="001">4153304</controlfield>
+              <controlfield tag="008">780818s1952    nyu           000 0 eng d</controlfield>
+              <datafield ind1=" " ind2=" " tag="040">
+                <subfield code="a">APL</subfield>
+                <subfield code="b">eng</subfield>
+                <subfield code="c">APL</subfield>
+                <subfield code="d">OCLCQ</subfield>
+                <subfield code="d">OCLCO</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="019">
+                <subfield code="a">222036721</subfield>
+              </datafield>
+              <datafield ind1="1" ind2=" " tag="029">
+                <subfield code="a">AU@</subfield>
+                <subfield code="b">000011817903</subfield>
+              </datafield>
+              <datafield ind1="1" ind2=" " tag="029">
+                <subfield code="a">AU@</subfield>
+                <subfield code="b">000060636819</subfield>
+              </datafield>
+              <datafield ind1=" " ind2="4" tag="050">
+                <subfield code="a">BX5943</subfield>
+                <subfield code="b">.A1 1952</subfield>
+              </datafield>
+              <datafield ind1=" " ind2="4" tag="082">
+                <subfield code="a">264.03</subfield>
+                <subfield code="b">P94 1952</subfield>
+              </datafield>
+              <datafield ind1="2" ind2=" " tag="110">
+                <subfield code="a">Episcopal Church.</subfield>
+                <subfield code="t">Book of Common Prayer.</subfield>
+              </datafield>
+              <datafield ind1="1" ind2="4" tag="245">
+                <subfield code="a">The Book of common prayer and administration of the sacraments and other rites and ceremonies of the church, according to the use of the Protestant Episcopal Church in the United States of America.</subfield>
+                <subfield code="b">Together with the Psalter or Psalms of David.</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="260">
+                <subfield code="a">New York,</subfield>
+                <subfield code="b">T. Nelson</subfield>
+                <subfield code="c">[1952]</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="300">
+                <subfield code="a">611 pages</subfield>
+                <subfield code="c">12 cm</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="336">
+                <subfield code="a">text</subfield>
+                <subfield code="b">txt</subfield>
+                <subfield code="2">rdacontent</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="337">
+                <subfield code="a">unmediated</subfield>
+                <subfield code="b">n</subfield>
+                <subfield code="2">rdamedia</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="338">
+                <subfield code="a">volume</subfield>
+                <subfield code="b">nc</subfield>
+                <subfield code="2">rdacarrier</subfield>
+              </datafield>
+              <datafield ind1="0" ind2=" " tag="730">
+                <subfield code="a">Bible.</subfield>
+                <subfield code="p">Psalms.</subfield>
+                <subfield code="l">English.</subfield>
+                <subfield code="f">1952.</subfield>
+              </datafield>
+            </record>
+          </bibliographicRecord>
+          <holdings>
+            <holding>
+              <typeOfRecord>x</typeOfRecord>
+              <encodingLevel>u</encodingLevel>
+              <format>zu</format>
+              <receiptAcqStatus>2</receiptAcqStatus>
+              <generalRetention>8</generalRetention>
+              <completeness>4</completeness>
+              <dateOfReport>140224</dateOfReport>
+              <nucCode>IHC</nucCode>
+              <localLocation>IHCA</localLocation>
+              <shelvingLocation>General Collection</shelvingLocation>
+              <callNumber>BX5943 .A1 1952</callNumber>
+              <copyNumber>c.1</copyNumber>
+              <volumes>
+                <volume/>
+              </volumes>
+              <circulations>
+                <circulation>
+                  <availableNow value="1"/>
+                  <itemId>39312000565469</itemId>
+                  <renewable value="0"/>
+                  <onHold value="0"/>
+                </circulation>
+              </circulations>
+            </holding>
+            <holding>
+              <typeOfRecord>x</typeOfRecord>
+              <encodingLevel>u</encodingLevel>
+              <format>zu</format>
+              <receiptAcqStatus>2</receiptAcqStatus>
+              <generalRetention>8</generalRetention>
+              <completeness>4</completeness>
+              <dateOfReport>140224</dateOfReport>
+              <nucCode>IME</nucCode>
+              <localLocation>IMEA</localLocation>
+              <shelvingLocation>General Books (North)</shelvingLocation>
+              <callNumber>264.03 P94</callNumber>
+              <copyNumber>c.1</copyNumber>
+              <volumes>
+                <volume/>
+              </volumes>
+              <circulations>
+                <circulation>
+                  <availableNow value="1"/>
+                  <itemId>39304000386921</itemId>
+                  <renewable value="0"/>
+                  <onHold value="0"/>
+                </circulation>
+              </circulations>
+            </holding>
+          </holdings>
+          <holdQueueSize>0</holdQueueSize>
+        </opacRecord>
+      </recordData>
+    </record>
+  </records>
+  <nextRecordPosition>1</nextRecordPosition>
+</searchRetrieveResponse>
