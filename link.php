@@ -21,7 +21,7 @@ function createLogs() {
 }
 
 
-/*lookUp function queries WorldCat Availability API for holdings and availability   
+/*lookUp Function queries WorldCat Availability API for holdings and availability   
 and returns institutional holdings as well as holdings available across PALShare*/
 function lookUp() {
     $config = include('config.php');
@@ -35,6 +35,8 @@ function lookUp() {
     //define openURL parameters from generic URL from WorldCat Local / Discovery
     if (isset($_GET['rfe_dat'])) {
        $oclcNum = $_GET['rfe_dat'];
+       //remove any blank spaces to clean up any OCLC number errors
+       $oclcNum = trim($oclcNum); 
     }
     if (isset($_GET['rft_btitle'])) {
       $bookTitle = urlencode($_GET['rft_btitle']);
@@ -98,6 +100,7 @@ function lookUp() {
         	$titlec = $xmlObj->xpath('//datafield[@tag="245"]/subfield[@code="c"]');
         		if (!empty($titlea)) {
           			$bookTitle = $titlea[0];
+          			$titlea = $titlea[0];
         		}
         		if (!empty($titleb)) {
           			$bookTitle = $bookTitle . $titleb[0];
@@ -188,16 +191,16 @@ function lookUp() {
           		file_put_contents($logfile, $current);
 	  Header( 'Location: '. $openILL  ) ;
     }
-return array('instItems' => $instItems, 'institutions' => $resItems, 'oclcNum' => $oclcNum, 'query' => $query, 'bookTitle' => $bookTitle);
+return array('instItems' => $instItems, 'institutions' => $resItems, 'oclcNum' => $oclcNum, 'query' => $query, 'bookTitle' => $bookTitle, 'titlea' => $titlea);
 }
 
 
-/*showPage function displays institutional holdings and/or stackMap, if stackMap is available*/
+/*showPage Function displays institutional holdings and/or stackMap, if stackMap is available*/
 #function showPage($lookUpResult) {
-function showPage($instItems,$bookTitle,$instoclc) {
+function showPage($instItems,$bookTitle,$instoclc,$titlea) {
                     $config = include('config.php');
                     //TODO - fix the resshareURL; the $lookUpResult parameter is not just the OCLC number
-                    $resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' . $bookTitle . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $instoclc . '/circ/hold/PLACE_HOLD';
+                    $resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' . $titlea . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $instoclc . '/circ/hold/PLACE_HOLD';
                     echo '<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Get It!</title><link rel="stylesheet" href="../bootstrap/css/sticky-footer-navbar.css"><link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css"><script>
 					function getReferrer() {
     				var x = document.referrer;
@@ -237,14 +240,16 @@ function showPage($instItems,$bookTitle,$instoclc) {
 
 
 
-/*function create resource sharing place hold URL*/
+/*Function create resource sharing place hold URL*/
 function resShare($ressearch,$resoclc) {
       
       //include config and nonlending settings
       	$config = include('config.php');
       	require('nonlending.php');
+      //Build the resource sharing URL
 	  	$resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' . $ressearch . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $resoclc. '/circ/hold/PLACE_HOLD';
-	  
+	  //Uncomment below for debugging output
+	    //echo $resshareurl;
 	  //Write to log file
 	  	$createLogsResult = createLogs();
 	  	
@@ -253,7 +258,7 @@ function resShare($ressearch,$resoclc) {
 	  	file_put_contents($createLogsResult,$current);
 	  
 	  
-	  //Direct to Resource Sharing URL
+	  //Send user to to Resource Sharing URL
 	  	Header( 'Location: https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' .$ressearch. '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $resoclc . '/circ/hold/PLACE_HOLD' );
 }
 
@@ -261,7 +266,7 @@ function resShare($ressearch,$resoclc) {
 
 
 
-/*function directs request to ILL Form
+/*Function directs request to ILL Form
 Pass OCLC Number or query from original request*/
 function requestILL($illquery,$illoclc) {
 	//include config file
@@ -298,18 +303,23 @@ if (is_array($lookUpResult['instItems'])) {
   $instItems = $lookUpResult['instItems'];
   $bookTitle = $lookUpResult['bookTitle'];
   $instoclc = $lookUpResult['oclcNum'];
-  showPage($instItems,$bookTitle,$instoclc);
+  //titlea is just 245$a
+  $titlea = $lookUpResult['titlea'];
+  showPage($instItems,$bookTitle,$instoclc,$titlea);
   
   
 //if PALShare holdings, direct to PALShare hold
 //institutions is resItems of lookUpResult function (available resource sharing items)
 } elseif (is_array($lookUpResult['institutions'])) {
-  $ressearch = $lookUpResult['bookTitle'];
+  //Use only 245$a as the title to be used in the query URL parameter; queries that are too long break the place hold screen
+  $ressearch = $lookUpResult['titlea'];
+  //Must have OCLC number
   $resoclc = $lookUpResult['oclcNum'];
   //comment out for debugging to only show resource sharing array output
   resShare($ressearch,$resoclc);
   //Uncomment for debugging
   //print_r($lookUpResult['institutions']);
+  //print_r($lookUpResult['oclcNum']);
   //print_r($lookUpResult['bookTitle']);
   
 //No institution or PALShare holdings, send user to ILL request
