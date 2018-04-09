@@ -200,7 +200,9 @@ return array('instItems' => $instItems, 'institutions' => $resItems, 'oclcNum' =
 function showPage($instItems,$bookTitle,$instoclc,$titlea) {
                     $config = include('config.php');
                     //TODO - fix the resshareURL; the $lookUpResult parameter is not just the OCLC number
-                    $resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' . $titlea . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $instoclc . '/circ/hold/PLACE_HOLD';
+                    //$resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' . $titlea . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $instoclc . '/circ/hold/PLACE_HOLD';
+                    $resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/placehold/formData/oclcNumber/'. $instoclc . '/L2/true' ;
+
                     echo '<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Get It!</title><link rel="stylesheet" href="../bootstrap/css/sticky-footer-navbar.css"><link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css"><script>
 					function getReferrer() {
     				var x = document.referrer;
@@ -247,7 +249,8 @@ function resShare($ressearch,$resoclc) {
       	$config = include('config.php');
       	require('nonlending.php');
       //Build the resource sharing URL
-	  	$resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' . $ressearch . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $resoclc. '/circ/hold/PLACE_HOLD';
+	  	//$resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' . $ressearch . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $resoclc. '/circ/hold/PLACE_HOLD';
+	  	$resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/placehold/formData/oclcNumber/'. $resoclc . '/L2/true';
 	  //Uncomment below for debugging output
 	    //echo $resshareurl;
 	  //Write to log file
@@ -259,7 +262,9 @@ function resShare($ressearch,$resoclc) {
 	  
 	  
 	  //Send user to to Resource Sharing URL
-	  	Header( 'Location: https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' .$ressearch. '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $resoclc . '/circ/hold/PLACE_HOLD' );
+	  	//Header( 'Location: https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' .$ressearch. '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $resoclc . '/circ/hold/PLACE_HOLD' );
+        Header( 'Location: https://' . $config['institutionURL'] .'.worldcat.org/placehold/formData/oclcNumber/' . $resoclc . '/L2/true' );
+
 }
 
 
