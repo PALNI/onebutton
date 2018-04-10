@@ -3,7 +3,8 @@
 //Request data from Availability API
    use OCLC\Auth\WSKey;
    use OCLC\User;
-   use Guzzle\Http\Client;
+   use GuzzleHttp\Client;
+   use GuzzleHttp\Exception\RequestException;
    
 $config = include('config.php');
 
@@ -79,16 +80,17 @@ function lookUp() {
 
    $authorizationHeader = $wskey->getHMACSignature('GET', $url, $options);
    
-   $client = new Guzzle\Http\Client();
-   $client->get('config/curl/' . CURLOPT_SSLVERSION, 3);
+   $client = new GuzzleHttp\Client();
+   //$client->get('config/curl/' . CURLOPT_SSLVERSION, 3);
    $headers = array();
    $headers['Authorization'] = $authorizationHeader;
-   $request = $client->createRequest('GET', $url, $headers);
+   $request = $client->request('GET', $url, ['headers' => $headers]);
+
 
    //send request, get back XML
    try {
-   		$response = $request->send();
-        $xml = $response->getBody(TRUE);
+   		//$response = $request->send();
+        $xml = $request->getBody();
         $xmlObj = simplexml_load_string($xml);
         //Get the title of the book for use on results display screen
         	$titlea = "";
@@ -201,8 +203,7 @@ function showPage($instItems,$bookTitle,$instoclc,$titlea) {
                     $config = include('config.php');
                     //TODO - fix the resshareURL; the $lookUpResult parameter is not just the OCLC number
                     //$resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/search?sortKey=LIBRARY_PLUS_RELEVANCE&databaseList=638&queryString=' . $titlea . '&changedFacet=author&scope=&format=all&database=all#/oclc/' . $instoclc . '/circ/hold/PLACE_HOLD';
-                    $resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/placehold/formData/oclcNumber/'. $instoclc . '/L2/true' ;
-
+                    $resshareurl = 'https://' . $config['institutionURL'] .'.worldcat.org/placehold/formData/oclcNumber/'. $instoclc . '/L2/true';
                     echo '<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Get It!</title><link rel="stylesheet" href="../bootstrap/css/sticky-footer-navbar.css"><link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css"><script>
 					function getReferrer() {
     				var x = document.referrer;
