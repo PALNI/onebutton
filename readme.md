@@ -54,7 +54,7 @@ You can set up OneButton for WorldCat Local or Discovery in OCLC Service Configu
 
 - Set up the base URL of your OneButton installation as an OpenURL 1.0 link resolver
 - Reference the OneButton  OpenURL Resolver you set up under Resource Sharing (Any Level) and give it a label (suggested label: Get It)
-- OneButton is designed to only work with print book materials.  Under the fulfillment button display settings, set the OneButton resolver to only display for monographs owned by your resource sharing network.  Use general ILL fulfillment buttons for other types (serials, articles, etc.)
+- OneButton is designed to only work with print book materials.  Under the fulfillment button display settings, set the OneButton resolver to only display for monographs owned by your resource sharing network.  Use general ILL fulfillment buttons for other types (serials, articles, etc.).  You can also set it up to display for monographs regardless of ownership (i.e., if you own it, the resource sharing network owns it, or it is not owned at all - OneButton will direct users to the ILL form you indicate in config.php.
 
 
 
