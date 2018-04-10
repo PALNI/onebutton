@@ -5,15 +5,16 @@ OneButton was designed for the WorldCat Local/Discovery environment and relies o
 
 ## Requirements
 
--PHP 5.6+
--Composer
--A WSKey for the OCLC WMS Availability API
--The OCLC PHP Auth Library
+- PHP 5.6+
+- Composer
+- A WSKey for the OCLC WMS Availability API
+- The OCLC PHP Auth Library
 
 ## Installation
 
 At the application (domain) root, install dependencies with Composer.  Sample composer.json file:
 
+```javascript
 {
   "name" : "MyApp",
   "repositories":
@@ -28,6 +29,7 @@ At the application (domain) root, install dependencies with Composer.  Sample co
     "OCLC/Auth" : ">=3.0"
   }
 }
+```
 
 Create a subdirectory for each institution and clone this repository in that subdirectory.
 
@@ -50,9 +52,9 @@ http://somewebsite.edu/institution/link.php?url_ver=Z39.88-2004&rft_val_fmt=info
 
 You can set up OneButton for WorldCat Local or Discovery in OCLC Service Configuration.
 
--Set up the base URL of your OneButton installation as an OpenURL 1.0 link resolver
--Reference the OneButton  OpenURL Resolver you set up under Resource Sharing (Any Level) and give it a label (suggested label: Get It)
--OneButton is designed to only work with print book materials.  Under the fulfillment button display settings, set the OneButton resolver to only display for monographs owned by your resource sharing network.  Use general ILL fulfillment buttons for other types (serials, articles, etc.)
+- Set up the base URL of your OneButton installation as an OpenURL 1.0 link resolver
+- Reference the OneButton  OpenURL Resolver you set up under Resource Sharing (Any Level) and give it a label (suggested label: Get It)
+- OneButton is designed to only work with print book materials.  Under the fulfillment button display settings, set the OneButton resolver to only display for monographs owned by your resource sharing network.  Use general ILL fulfillment buttons for other types (serials, articles, etc.)
 
 
 
