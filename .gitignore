@@ -1,3 +1,4 @@
 config.php
 *.old
 logs/*
+nonlending.php
